@@ -1,49 +1,61 @@
-var xmpp = require("./xmpp.js");
-var api = require("./api.js");
+var xmpp = require("node-xmpp-server");
 var path = require("path");
-var program = require("commander");
-var rollbar = require("rollbar");
 
-program
-  .version("0.1.2")
-  .option(
-    "-p, --port <n>",
-    "The server port number. Defaults to 5269.",
-    parseInt
-  )
-  .option("-b, --bindAddress <value>", "The server bind address")
-  .option("-d, --domainAddress <value>", "The server domain")
-  .option("-k, --keyPath <path>", "The path of the TLS key")
-  .option("-c, --certPath <path>", "The path of the TLS certificate")
-  .option(
-    "-r, --rollbar <api_token>",
-    "Optional: The API Token for Rollbar crash reporting"
-  )
-  .parse(process.argv);
-
-var rollbarKey = program.rollbar;
-if (rollbarKey) {
-  var options = {
-    // Call process.exit(1) when an uncaught exception occurs but after reporting all
-    // pending errors to Rollbar.
-    //
-    // Default: false
-    exitOnUncaughtException: true
-  };
-  rollbar.handleUncaughtExceptions(rollbarKey, options);
-}
-var port = program.port || 5269;
-var bindAddress = program.bindAddress;
-var domain = program.domainAddress;
 var tls = {};
 tls.keyPath = path.resolve("server.key");
 tls.certPath = path.resolve("server.cert");
-var options = {
-  tls: tls
-};
 
-var xServer = new xmpp.xmppServer();
-xServer.setup(port, bindAddress, domain, options);
-xServer.on("push", function(pushInfo) {
-  console.log("they want us to push, shit", pushInfo);
+var startServer = function(done) {
+  // Sets up the server.
+  var server = new xmpp.C2S.TCPServer({
+    port: 5228,
+    domain: "mtalk.google.com",
+    tls
+  });
+
+  // On connection event. When a client connects.
+  server.on("connection", function(client) {
+    // That's the way you add mods to a given server.
+
+    // Allows the developer to register the jid against anything they want
+    client.on("register", function(opts, cb) {
+      console.log("REGISTER");
+      cb(true);
+    });
+
+    // Allows the developer to authenticate users against anything they want.
+    client.on("authenticate", function(opts, cb) {
+      console.log("server:", opts.username, opts.password, "AUTHENTICATING");
+      if (opts.password === "secret") {
+        console.log("server:", opts.username, "AUTH OK");
+        cb(null, opts);
+      } else {
+        console.log("server:", opts.username, "AUTH FAIL");
+        cb(false);
+      }
+    });
+
+    client.on("online", function() {
+      console.log("server:", client.jid.local, "ONLINE");
+    });
+
+    // Stanza handling
+    client.on("stanza", function(stanza) {
+      console.log("server:", client.jid.local, "stanza", stanza.toString());
+      var from = stanza.attrs.from;
+      stanza.attrs.from = stanza.attrs.to;
+      stanza.attrs.to = from;
+      client.send(stanza);
+    });
+
+    // On Disconnect event. When a client disconnects
+    client.on("disconnect", function() {
+      console.log("server:", client.jid.local, "DISCONNECT");
+    });
+  });
+
+  server.on("listening", done);
+};
+startServer(() => {
+  console.log("listening");
 });

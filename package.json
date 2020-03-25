@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node ./src/index.js -p 5228 -b 127.0.0.1 -d mtalk.google.com"
+    "start": "node ./src/index.js"
   },
   "keywords": [],
   "author": "Nicholas Tarsillo",
@@ -18,12 +18,13 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
+    "@types/node-xmpp-client": "^3.1.4",
     "body-parser": "1.19.0",
+    "commander": "5.0.0",
     "dotenv": "8.2.0",
     "express": "4.17.1",
     "node-xmpp-server": "2.2.7",
     "request": "2.88.2",
-    "commander": "5.0.0",
     "rollbar": "2.15.0"
   }
 }
