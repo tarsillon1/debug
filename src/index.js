@@ -36,12 +36,12 @@ var startServer = function(done) {
     });
 
     client.on("online", function() {
-      console.log("server:", client.jid.local, "ONLINE");
+      console.log("server:", client.from, "ONLINE");
     });
 
     // Stanza handling
     client.on("stanza", function(stanza) {
-      console.log("server:", client.jid.local, "stanza", stanza.toString());
+      console.log("server:", client.from, "stanza", stanza.toString());
       var from = stanza.attrs.from;
       stanza.attrs.from = stanza.attrs.to;
       stanza.attrs.to = from;
@@ -50,7 +50,7 @@ var startServer = function(done) {
 
     // On Disconnect event. When a client disconnects
     client.on("disconnect", function() {
-      console.log("server:", client.jid.local, "DISCONNECT");
+      console.log("server:", client.from, "DISCONNECT");
     });
   });
 
