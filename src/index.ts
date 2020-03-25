@@ -1,5 +1,6 @@
 import * as tls from "tls";
 import * as fs from "fs";
+import { Socket } from "net";
 
 var options = {
   key: fs.readFileSync("server.key"),
@@ -15,7 +16,7 @@ server.on("close", function() {
 });
 
 // emitted when new client connects
-server.on("connection", function(socket: any) {
+server.on("connection", function(socket: Socket) {
   //this property shows the number of characters currently buffered to be written. (Number of characters is approximately equal to the number of bytes to be written, but the buffer may contain strings, and the strings are lazily encoded, so the exact number of bytes is not known.)
   //Users who experience large or growing bufferSize should attempt to "throttle" the data flows in their program with pause() and resume().
 
@@ -44,7 +45,7 @@ server.on("connection", function(socket: any) {
     console.log("Number of concurrent connections to the server : " + count);
   });
 
-  socket.setEncoding("utf8");
+  //   socket.setEncoding("utf8");
 
   socket.setTimeout(800000, function() {
     // called after timeout -> same as socket.on('timeout')
@@ -60,16 +61,6 @@ server.on("connection", function(socket: any) {
     console.log("Bytes read : " + bread);
     console.log("Bytes written : " + bwrite);
     console.log("Data sent to server : " + data);
-
-    //echo data
-    var is_kernel_buffer_full = socket.write("Data ::" + data);
-    if (is_kernel_buffer_full) {
-      console.log(
-        "Data was flushed successfully from kernel buffer i.e written successfully!"
-      );
-    } else {
-      socket.pause();
-    }
   });
 
   socket.on("drain", function() {
