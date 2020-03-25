@@ -22,6 +22,8 @@ server.on("connection", function(socket: Socket) {
 
   console.log("Buffer size : " + socket.bufferSize);
 
+  console.log("connected at", Date.now());
+
   console.log("---------server details -----------------");
 
   var lport = socket.localPort;
@@ -92,8 +94,9 @@ server.on("connection", function(socket: Socket) {
     console.log("Bytes written : " + bwrite);
     console.log("Socket closed!");
     if (error) {
-      console.log("Socket was closed coz of transmission error");
+      console.log("Socket was closed coz of transmission error", error);
     }
+    console.log("closed at", Date.now());
   });
 
   setTimeout(function() {
