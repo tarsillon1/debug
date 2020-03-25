@@ -1,7 +1,13 @@
-var net = require("net");
+import * as tls from "tls";
+import * as fs from "fs";
+
+var options = {
+  key: fs.readFileSync("server.key"),
+  cert: fs.readFileSync("server.cert")
+};
 
 // creates the server
-var server = net.createServer();
+var server = tls.createServer(options);
 
 //emitted when server closes ...not emitted until all connections closes.
 server.on("close", function() {
@@ -16,14 +22,6 @@ server.on("connection", function(socket: any) {
   console.log("Buffer size : " + socket.bufferSize);
 
   console.log("---------server details -----------------");
-
-  var address = server.address();
-  var port = address.port;
-  var family = address.family;
-  var ipaddr = address.address;
-  console.log("Server is listening at port" + port);
-  console.log("Server ip :" + ipaddr);
-  console.log("Server is IP4/IP6 : " + family);
 
   var lport = socket.localPort;
   var laddr = socket.localAddress;
